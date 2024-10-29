@@ -1,5 +1,3 @@
-
-
 .set IRQ_BASE, 0x20
 
 .section .text
@@ -7,10 +5,18 @@
 .extern _ZN16InterruptManager15HandleInterruptEhj
 
 
-.macro HandleException num
+.macro HandleExceptionErrCode num
 .global _ZN16InterruptManager19HandleException\num\()Ev
 _ZN16InterruptManager19HandleException\num\()Ev:
     movb $\num, (interruptnumber)
+    jmp int_bottom
+.endm
+
+.macro HandleExceptionNoErrCode num
+.global _ZN16InterruptManager19HandleException\num\()Ev
+_ZN16InterruptManager19HandleException\num\()Ev:
+    movb $\num, (interruptnumber)
+    push $0                    # Push Dummy Error Code
     jmp int_bottom
 .endm
 
@@ -19,30 +25,42 @@ _ZN16InterruptManager19HandleException\num\()Ev:
 .global _ZN16InterruptManager26HandleInterruptRequest\num\()Ev
 _ZN16InterruptManager26HandleInterruptRequest\num\()Ev:
     movb $\num + IRQ_BASE, (interruptnumber)
+    push $0                    # Push Dummy Error Code
     jmp int_bottom
 .endm
 
-
-HandleException 0x00
-HandleException 0x01
-HandleException 0x02
-HandleException 0x03
-HandleException 0x04
-HandleException 0x05
-HandleException 0x06
-HandleException 0x07
-HandleException 0x08
-HandleException 0x09
-HandleException 0x0A
-HandleException 0x0B
-HandleException 0x0C
-HandleException 0x0D
-HandleException 0x0E
-HandleException 0x0F
-HandleException 0x10
-HandleException 0x11
-HandleException 0x12
-HandleException 0x13
+HandleExceptionNoErrCode 0x00
+HandleExceptionNoErrCode 0x01
+HandleExceptionNoErrCode 0x02
+HandleExceptionNoErrCode 0x03
+HandleExceptionNoErrCode 0x04
+HandleExceptionNoErrCode 0x05
+HandleExceptionNoErrCode 0x06
+HandleExceptionNoErrCode 0x07
+HandleExceptionErrCode   0x08
+HandleExceptionNoErrCode 0x09
+HandleExceptionErrCode   0x0A
+HandleExceptionErrCode   0x0B
+HandleExceptionErrCode   0x0C
+HandleExceptionErrCode   0x0D
+HandleExceptionErrCode   0x0E
+HandleExceptionNoErrCode 0x0F
+HandleExceptionNoErrCode 0x10
+HandleExceptionErrCode   0x11
+HandleExceptionNoErrCode 0x12
+HandleExceptionNoErrCode 0x13
+HandleExceptionNoErrCode 0x14
+HandleExceptionErrCode   0x15
+HandleExceptionNoErrCode 0x16
+HandleExceptionNoErrCode 0x17
+HandleExceptionNoErrCode 0x18
+HandleExceptionNoErrCode 0x19
+HandleExceptionNoErrCode 0x1A
+HandleExceptionNoErrCode 0x1B
+HandleExceptionNoErrCode 0x1C
+HandleExceptionErrCode   0x1D
+HandleExceptionErrCode   0x1E
+HandleExceptionNoErrCode 0x1F
 
 HandleInterruptRequest 0x00
 HandleInterruptRequest 0x01
@@ -63,7 +81,6 @@ HandleInterruptRequest 0x0F
 HandleInterruptRequest 0x31
 
 int_bottom:
-
     # register sichern
     pusha
     pushl %ds
@@ -72,16 +89,17 @@ int_bottom:
     pushl %gs
 
     # ring 0 segment register laden
-    #cld
-    #mov $0x10, %eax
-    #mov %eax, %eds
-    #mov %eax, %ees
+    #mov $0x18, %eax
+    #mov %eax, %ds
+    #mov %eax, %es
+    #mov %eax, %fs
+    #mov %eax, %gs
 
     # C++ Handler aufrufen
+    cld
     pushl %esp
     push (interruptnumber)
     call _ZN16InterruptManager15HandleInterruptEhj
-    add %esp, 6
     mov %eax, %esp # den stack wechseln
 
     # register laden
@@ -90,12 +108,12 @@ int_bottom:
     pop %es
     pop %ds
     popa
+    add $4, %esp               # Remove error code
 
 .global _ZN16InterruptManager15InterruptIgnoreEv
 _ZN16InterruptManager15InterruptIgnoreEv:
-
     iret
 
 
 .data
-    interruptnumber: .byte 0
+    interruptnumber: .long 0

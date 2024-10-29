@@ -11,7 +11,23 @@ GlobalDescriptorTable::GlobalDescriptorTable()
     uint32_t i[2];
     i[1] = (uint32_t)this;
     i[0] = sizeof(GlobalDescriptorTable) << 16;
-    asm volatile("lgdt (%0)": :"p" (((uint8_t *) i)+2));
+    asm volatile(
+    "lgdt %0\n"
+    "mov %2, %%ds\n"     /* Set segments to the data selector */
+    "mov %2, %%es\n"
+    "mov %2, %%fs\n"
+    "mov %2, %%gs\n"
+    "mov %2, %%ss\n"
+    "push %1\n"          /* Use Far Return to set CS:EIP */
+    "push $1f\n"
+    "retf\n"
+    "1:\n"               /* Far return returns to this location */
+    :
+    : "m" (*(((uint8_t *) i)+2)),
+      "r"(CodeSegmentSelector()), 
+      "r"(DataSegmentSelector())
+    : "memory"
+  );
 }
 
 GlobalDescriptorTable::~GlobalDescriptorTable()
