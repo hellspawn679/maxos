@@ -3,6 +3,8 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "mouse.h"
+#include "driver.h"
 
 void printf(char* str)
 {
@@ -41,7 +43,63 @@ void printf(char* str)
     }
 }
 
+void printfHex(uint8_t key)
+{
+    char* foo = "00";
+    char* hex = "0123456789ABCDEF";
+    foo[11] = hex[(key >> 4) & 0xF];
+    foo[12] = hex[key & 0xF];
+    printf(foo);
+}
 
+
+class PrintfKeyBoardEventHandler : public KeyboardEventHandler
+{
+    public: 
+        void OnKeyDown( char c)
+        {
+            char* foo =" ";
+            foo[0]=c;
+            printf(foo);
+        }
+};
+
+
+class MouseToConsole : public MouseEventHandler
+{
+    int8_t x,y;
+
+public:
+    MouseToConsole()
+    {
+        x=40;
+        y=12;
+        uint16_t* VideoMemory = (uint16_t*)0xb8000;
+        VideoMemory[80*y+x]= ((VideoMemory[80*y+x] & 0xF000) >> 4)|
+                                ((VideoMemory[80*y+x] & 0x0F00) << 4)|
+                                ((VideoMemory[80*y+x] & 0x00FF));
+    }
+    void OnMouseMove(int xoffset,int yoffset)
+    {
+         static uint16_t* VideoMemory = (uint16_t*)0xb8000;
+
+            VideoMemory[80*y+x]= ((VideoMemory[80*y+x] & 0xF000) >> 4)|
+                                ((VideoMemory[80*y+x] & 0x0F00) << 4)|
+                                ((VideoMemory[80*y+x] & 0x00FF));
+
+            x+=xoffset;
+            if(x<0) x=0;
+            if(x>=80) x=79;
+            y+=yoffset;
+            if (y<0) y=0;
+            if(y>=25) y=24;
+
+            //VideoMemory[80*y+x]= (VideoMemory[80*y+x] & 0xF000) | ((VideoMemory[80*y+x] + 1) & 0x0FFF);
+            VideoMemory[80*y+x]= ((VideoMemory[80*y+x] & 0xF000) >> 4)|
+                                ((VideoMemory[80*y+x] & 0x0F00) << 4)|
+                                ((VideoMemory[80*y+x] & 0x00FF));
+    }
+};
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -56,13 +114,27 @@ extern "C" void callConstructors()
 
 extern "C" void kernelMain(const void* multiboot_structure, uint32_t /*multiboot_magic*/)
 {
-    printf("Hello World! my name is mehul");
+    printf("Welcome to BREAK OS this os made from ground up to learn how os works \nThis is made by  mehul gautam student of IIIT Gwalior \n");
 
     GlobalDescriptorTable gdt;
     InterruptManager interrupts(0x20, &gdt);
 
-    KeyboardDriver keyboard(&interrupts);
+    printf("Initializing Hardware, Stage 1\n");
 
+    DriverManager drvManager;
+        PrintfKeyBoardEventHandler kbhandler;
+        KeyboardDriver keyboard(&interrupts, &kbhandler);
+        drvManager.AddDriver(&keyboard);
+        
+
+        MouseToConsole mousehandler;
+        MouseDriver mouse(&interrupts, &mousehandler);
+        drvManager.AddDriver(&mouse);
+
+
+    printf("Initializing Hardware, Stage 2\n");
+        drvManager.ActivateAll();
+    printf("Initializing Hardware, Stage 3\n");
     interrupts.Activate();
     while(1);
 }
