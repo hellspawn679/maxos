@@ -1,5 +1,6 @@
-
-#include "port.h"
+#include <hardwarecommunication/port.h>
+using namespace maxos::common;
+using namespace maxos::hardwarecommunication;
 
 
 Port::Port(uint16_t portnumber)

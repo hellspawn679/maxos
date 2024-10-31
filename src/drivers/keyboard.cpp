@@ -1,7 +1,8 @@
-#include "keyboard.h"
+#include <drivers/keyboard.h>
 
-
-
+using namespace maxos::common;
+using namespace maxos::drivers;
+using namespace maxos::hardwarecommunication;
 
 KeyboardEventHandler::KeyboardEventHandler()
 {

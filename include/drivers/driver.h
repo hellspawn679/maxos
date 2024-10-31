@@ -1,6 +1,9 @@
-#ifndef __DRIVER_H
-#define __DRIVER_H
-
+#ifndef __MAXOS__DRIVERS__DRIVER_H
+#define __MAXOS__DRIVERS__DRIVER_H
+namespace maxos
+{
+    namespace drivers
+    {
     class Driver
     {
         public:
@@ -21,5 +24,6 @@
             void AddDriver(Driver* );
             void ActivateAll();
     };
-
+    }
+}
 #endif

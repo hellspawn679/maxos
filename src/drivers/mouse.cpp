@@ -1,7 +1,9 @@
-#include "mouse.h"
+#include <drivers/mouse.h>
 
 
-
+using namespace maxos::common;
+using namespace maxos::drivers;
+using namespace maxos::hardwarecommunication;
 
 MouseEventHandler::MouseEventHandler()
 {

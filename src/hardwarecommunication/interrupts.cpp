@@ -1,6 +1,7 @@
 
-#include "interrupts.h"
-
+#include <hardwarecommunication/interrupts.h>
+using namespace maxos::common;
+using namespace maxos::hardwarecommunication;
 
 void printf(char* str);
 void printfHex(uint8_t key);

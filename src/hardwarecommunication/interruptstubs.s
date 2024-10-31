@@ -2,19 +2,19 @@
 
 .section .text
 
-.extern _ZN16InterruptManager15HandleInterruptEhj
+.extern _ZN5maxos21hardwarecommunication16InterruptManager15HandleInterruptEhj
 
 
 .macro HandleExceptionErrCode num
-.global _ZN16InterruptManager19HandleException\num\()Ev
-_ZN16InterruptManager19HandleException\num\()Ev:
+.global _ZN5maxos21hardwarecommunication16InterruptManager19HandleException\num\()Ev
+_ZN5maxos21hardwarecommunication16InterruptManager19HandleException\num\()Ev:
     movb $\num, (interruptnumber)
     jmp int_bottom
 .endm
 
 .macro HandleExceptionNoErrCode num
-.global _ZN16InterruptManager19HandleException\num\()Ev
-_ZN16InterruptManager19HandleException\num\()Ev:
+.global _ZN5maxos21hardwarecommunication16InterruptManager19HandleException\num\()Ev
+_ZN5maxos21hardwarecommunication16InterruptManager19HandleException\num\()Ev:
     movb $\num, (interruptnumber)
     push $0                    # Push Dummy Error Code
     jmp int_bottom
@@ -22,8 +22,8 @@ _ZN16InterruptManager19HandleException\num\()Ev:
 
 
 .macro HandleInterruptRequest num
-.global _ZN16InterruptManager26HandleInterruptRequest\num\()Ev
-_ZN16InterruptManager26HandleInterruptRequest\num\()Ev:
+.global _ZN5maxos21hardwarecommunication16InterruptManager26HandleInterruptRequest\num\()Ev
+_ZN5maxos21hardwarecommunication16InterruptManager26HandleInterruptRequest\num\()Ev:
     movb $\num + IRQ_BASE, (interruptnumber)
     push $0                    # Push Dummy Error Code
     jmp int_bottom
@@ -99,7 +99,7 @@ int_bottom:
     cld
     pushl %esp
     push (interruptnumber)
-    call _ZN16InterruptManager15HandleInterruptEhj
+    call _ZN5maxos21hardwarecommunication16InterruptManager15HandleInterruptEhj
     mov %eax, %esp # den stack wechseln
 
     # register laden
@@ -110,8 +110,8 @@ int_bottom:
     popa
     add $4, %esp               # Remove error code
 
-.global _ZN16InterruptManager15InterruptIgnoreEv
-_ZN16InterruptManager15InterruptIgnoreEv:
+.global _ZN5maxos21hardwarecommunication16InterruptManager15InterruptIgnoreEv
+_ZN5maxos21hardwarecommunication16InterruptManager15InterruptIgnoreEv:
     iret
 
 

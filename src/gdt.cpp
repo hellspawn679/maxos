@@ -1,6 +1,7 @@
 
-#include "gdt.h"
-
+#include <gdt.h>
+using namespace maxos;
+using namespace maxos::common;
 
 GlobalDescriptorTable::GlobalDescriptorTable()
     : nullSegmentSelector(0, 0, 0),

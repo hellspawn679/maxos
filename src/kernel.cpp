@@ -1,10 +1,16 @@
 
-#include "types.h"
-#include "gdt.h"
-#include "interrupts.h"
-#include "keyboard.h"
-#include "mouse.h"
-#include "driver.h"
+
+#include <common/types.h>
+#include <gdt.h>
+#include <hardwarecommunication/interrupts.h>
+#include <drivers/driver.h>
+#include <drivers/keyboard.h>
+#include <drivers/mouse.h>
+
+using namespace maxos;
+using namespace maxos::common;
+using namespace maxos::drivers;
+using namespace maxos::hardwarecommunication;
 
 void printf(char* str)
 {
