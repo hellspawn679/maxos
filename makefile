@@ -10,6 +10,7 @@ objects = obj/loader.o \
           obj/gdt.o \
           obj/drivers/driver.o \
           obj/hardwarecommunication/port.o \
+		  obj/hardwarecommunication/pci.o \
           obj/hardwarecommunication/interruptstubs.o \
           obj/hardwarecommunication/interrupts.o \
           obj/drivers/keyboard.o \
